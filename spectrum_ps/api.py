@@ -1,27 +1,54 @@
-from urllib.parse import urlparse
+from urllib.parse import urlsplit
 
 import frappe
 from frappe.utils.oauth import get_oauth2_authorize_url
 
 
-ALLOWED_PROVIDERS = {"google", "facebook"}
+ALLOWED_PROVIDERS = frozenset({"google", "facebook"})
+
+
+def _get_redirect_url() -> str:
+    redirect_url = frappe.conf.get("social_login_redirect_url")
+
+    if not isinstance(redirect_url, str) or not redirect_url.strip():
+        frappe.throw("Social login redirect URL is not configured")
+
+    redirect_url = redirect_url.strip()
+    parsed = urlsplit(redirect_url)
+
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.netloc
+        or parsed.username
+        or parsed.password
+        or parsed.fragment
+    ):
+        frappe.throw("Invalid social login redirect URL")
+
+    return redirect_url
 
 
 @frappe.whitelist(allow_guest=True)
-def get_social_login_url(provider: str):
-    provider = (provider or "").strip().lower()
+def get_social_login_urls() -> dict[str, str]:
+    redirect_url = _get_redirect_url()
+    social_login_urls = {}
 
-    if provider not in ALLOWED_PROVIDERS:
-        frappe.throw("Unsupported social login provider")
+    for provider in sorted(ALLOWED_PROVIDERS):
+        try:
+            social_login_urls[provider] = get_oauth2_authorize_url(
+                provider,
+                redirect_url,
+            )
+        except Exception as error:
+            # Replace this with the specific exception raised by your Frappe version
+            # for a missing/unconfigured Social Login Key.
+            # if _is_missing_social_login_provider(error, provider):
+            #     continue
 
-    redirect_to = frappe.conf.get("social_login_redirect_url")
+            frappe.log_error(
+                title=f"Social login URL generation failed: {provider}",
+                message=frappe.get_traceback(),
+            )
+            raise
 
-    if not redirect_to:
-        frappe.throw("Social login redirect URL is not configured")
-
-    parsed_redirect = urlparse(redirect_to)
-
-    if parsed_redirect.scheme not in {"http", "https"} or not parsed_redirect.netloc:
-        frappe.throw("Invalid social login redirect URL")
-
-    return get_oauth2_authorize_url(provider, redirect_to)
+    return social_login_urls
