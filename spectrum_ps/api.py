@@ -1,6 +1,7 @@
 from urllib.parse import urlsplit
 
 import frappe
+from frappe.exceptions import ValidationError
 from frappe.utils.oauth import get_oauth2_authorize_url
 
 
@@ -28,10 +29,16 @@ def _get_redirect_url() -> str:
     return redirect_url
 
 
+def _is_missing_client_secret(error: ValidationError, provider: str) -> bool:
+    return str(error) == (
+        f"Password not found for Social Login Key {provider} client_secret"
+    )
+
+
 @frappe.whitelist(allow_guest=True)
 def get_social_login_urls() -> dict[str, str]:
     redirect_url = _get_redirect_url()
-    social_login_urls = {}
+    social_login_urls: dict[str, str] = {}
 
     for provider in sorted(ALLOWED_PROVIDERS):
         try:
@@ -39,16 +46,14 @@ def get_social_login_urls() -> dict[str, str]:
                 provider,
                 redirect_url,
             )
-        except Exception as error:
-            # Replace this with the specific exception raised by your Frappe version
-            # for a missing/unconfigured Social Login Key.
-            # if _is_missing_social_login_provider(error, provider):
-            #     continue
+        except ValidationError as error:
+            if _is_missing_client_secret(error, provider):
+                frappe.logger().warning(
+                    "Skipping social login provider '%s': client secret is not configured",
+                    provider,
+                )
+                continue
 
-            frappe.log_error(
-                title=f"Social login URL generation failed: {provider}",
-                message=frappe.get_traceback(),
-            )
             raise
 
     return social_login_urls
