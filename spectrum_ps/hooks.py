@@ -256,5 +256,3 @@ app_license = "unlicense"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
-
-website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'},]
