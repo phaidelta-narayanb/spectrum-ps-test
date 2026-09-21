@@ -257,4 +257,4 @@ app_license = "unlicense"
 # ignore_translatable_strings_from = []
 
 
-website_route_rules = [{'from_route': '/Spectrum-PS/<path:app_path>', 'to_route': 'Spectrum-PS'},]
+website_route_rules = [{'from_route': '/admin/<path:app_path>', 'to_route': 'admin'},]

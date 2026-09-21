@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/spectrum_ps/Spectrum-PS/ && yarn copy-html-entry",
+    "build": "vite build --base=/assets/spectrum_ps/admin/ && yarn copy-html-entry",
     "lint": "oxlint",
     "preview": "vite preview",
-    "copy-html-entry": "cp ../spectrum_ps/public/Spectrum-PS/index.html ../spectrum_ps/www/Spectrum-PS.html"
+    "copy-html-entry": "cp ../spectrum_ps/public/admin/index.html ../spectrum_ps/www/admin.html"
   },
   "dependencies": {
     "frappe-react-sdk": "^1.17.1",

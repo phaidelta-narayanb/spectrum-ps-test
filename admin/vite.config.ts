@@ -1,7 +1,7 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react'
-import proxyOptions from './proxyOptions';
+import proxyOptions from './proxyOptions.ts';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +17,7 @@ export default defineConfig({
 		}
 	},
 	build: {
-		outDir: '../spectrum_ps/public/Spectrum-PS',
+		outDir: '../spectrum_ps/public/admin',
 		emptyOutDir: true,
 		target: 'es2015',
 	},
