@@ -1,3 +1,3 @@
 [submodule "admin"]
-    path = admin
-    url = git@github.com:phaidelta/spectrum-ps-ui-admin.git
+	path = admin
+	url = ../../phaidelta/spectrum-ps-ui-admin.git
